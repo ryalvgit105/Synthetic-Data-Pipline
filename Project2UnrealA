@@ -1,0 +1,31 @@
+import unreal
+def create_ground_plane(size=1000, location=(0, 0, 0)):
+    # Create a ground plane
+    ground = unreal.EditorLevelLibrary.spawn_actor_from_class(unreal.StaticMeshActor, location)
+    static_mesh = unreal.EditorAssetLibrary.load_asset('/Engine/BasicShapes/Plane')
+    ground.get_static_mesh_component().set_static_mesh(static_mesh)
+    ground.set_actor_scale3d(unreal.Vector(size / 100.0, size / 100.0, 1))
+    return ground
+def create_shape(shape_type, location):
+    shape_classes = {
+        'cube': '/Engine/BasicShapes/Cube',
+        'sphere': '/Engine/BasicShapes/Sphere',
+        'cylinder': '/Engine/BasicShapes/Cylinder'
+    }
+    if shape_type not in shape_classes:
+        raise ValueError(f"Unknown shape type: {shape_type}")
+    
+    shape = unreal.EditorLevelLibrary.spawn_actor_from_class(unreal.StaticMeshActor, location)
+    static_mesh = unreal.EditorAssetLibrary.load_asset(shape_classes[shape_type])
+    shape.get_static_mesh_component().set_static_mesh(static_mesh)
+    return shape
+def main():
+    # Create ground plane
+    create_ground_plane()
+    
+    # Create shapes at different locations
+    create_shape('cube', unreal.Vector(200, 0, 50))
+    create_shape('sphere', unreal.Vector(-200, 0, 50))
+    create_shape('cylinder', unreal.Vector(0, 200, 50))
+if __name__ == "__main__":  
+    main()
