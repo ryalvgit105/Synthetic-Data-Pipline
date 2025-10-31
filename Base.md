@@ -142,8 +142,6 @@ Result
 All imported assets from the military base pack now use HDRP shaders and materials. The purple “missing shader” issue disappears, and lighting behaves correctly under HDRP.
 
 
-3.
-
 4. Unity Coplay (LLM integration that allows for scene and object creation)
 https://github.com/CoplayDev/coplay-unity-plugin
 
