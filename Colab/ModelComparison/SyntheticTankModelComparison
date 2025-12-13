@@ -1,0 +1,190 @@
+# ================================================================
+# 1. Install and import Ultralytics
+# ================================================================
+!pip install ultralytics --quiet
+
+from ultralytics import YOLO
+import os
+import pandas as pd
+
+print("Ultralytics version loaded.")
+
+# ================================================================
+# 2. Mount Google Drive
+# ================================================================
+from google.colab import drive
+drive.mount('/content/drive')
+
+# ================================================================
+# 3. Define dataset path and create dataset YAML automatically
+# ================================================================
+dataset_dir = "/content/drive/My Drive/Colab Notebooks/MA489SyntheticDataPipeline/realTimeDatasets/realTanksdatasetV2"
+yaml_path = f"{dataset_dir}/realV2.yaml"
+
+yaml_text = f"""
+path: {dataset_dir}
+
+train: null
+val: valid/images
+test: test/images
+
+names:
+  0: tank
+"""
+
+# Write YAML file
+with open(yaml_path, "w") as f:
+    f.write(yaml_text)
+
+print("Created YAML at:", yaml_path)
+
+# ================================================================
+# 4. Verify dataset structure
+# ================================================================
+print("\n=== Dataset Structure Check ===")
+for root, dirs, files in os.walk(dataset_dir):
+    print(root)
+
+assert os.path.exists(f"{dataset_dir}/valid/images"), "Missing valid/images"
+assert os.path.exists(f"{dataset_dir}/valid/labels"), "Missing valid/labels"
+assert os.path.exists(f"{dataset_dir}/test/images"), "Missing test/images"
+assert os.path.exists(f"{dataset_dir}/test/labels"), "Missing test/labels"
+
+print("\nDataset structure verified.\n")
+
+# ================================================================
+# 5. Define model paths
+# ================================================================
+models = {
+    "pipeline1_v2": "/content/drive/My Drive/YOLO_Models/pipeline1_v2/best.pt",
+    "pipeline2_v2": "/content/drive/My Drive/YOLO_Models/pipeline2_v2/best.pt",
+    "pipeline3_v2": "/content/drive/My Drive/YOLO_Models/pipeline3_v2/best.pt",
+    "pipeline4_v2": "/content/drive/My Drive/YOLO_Models/pipeline4_v2/best.pt"
+}
+
+# Verify all models exist
+for name, path in models.items():
+    assert os.path.exists(path), f"Model not found: {path}"
+
+# ================================================================
+# 6. Evaluate each model on the real dataset
+# ================================================================
+print("=== Beginning Model Evaluation ===")
+
+results_list = []
+
+for name, path in models.items():
+    print(f"\n=== Evaluating {name} ===")
+
+    model = YOLO(path)
+    results = model.val(
+        data=yaml_path,
+        imgsz=640,
+        device="cpu"  # CPU-safe
+    )
+
+    metrics = results.results_dict
+
+    results_list.append({
+        "Model": name,
+        "mAP50": metrics["metrics/mAP50(B)"],
+        "mAP50-95": metrics["metrics/mAP50-95(B)"],
+        "Precision": metrics["metrics/precision(B)"],
+        "Recall": metrics["metrics/recall(B)"]
+    })
+
+# ================================================================
+# 7. Output summary table + save CSV
+# ================================================================
+df = pd.DataFrame(results_list)
+print("\n=== FINAL MODEL COMPARISON RESULTS ===\n")
+print(df)
+
+comparison_csv_path = "/content/drive/My Drive/YOLO_Models/model_comparison_realV2.csv"
+df.to_csv(comparison_csv_path, index=False)
+
+print("\nSaved comparison CSV to:", comparison_csv_path)
+
+# ================================================================
+# 8. Save prediction images for each model
+# ================================================================
+pred_base = "/content/drive/My Drive/YOLO_Models/realV2_predictions"
+
+print("\n=== Creating Prediction Outputs ===")
+
+for name, path in models.items():
+    print(f"\nRunning predictions for {name}...")
+
+    model = YOLO(path)
+    model.predict(
+        source=f"{dataset_dir}/test/images",
+        save=True,
+        imgsz=640,
+        device="cpu",
+        name=f"realV2_{name}"
+    )
+
+print("\nAll predictions saved in:", pred_base)
+print("\n=== COMPLETE ===")
+
+--------------------------------------------------------------------------------------------------------
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+
+def show_mosaic(image_path, save_dir=None):
+    preds = []
+    for name, model_path in models.items():
+        out_dir = f"/content/runs/detect/realV2_{name}"
+        pred_path = f"{out_dir}/{os.path.basename(image_path)}"
+
+        if os.path.exists(pred_path):
+            preds.append(cv2.cvtColor(cv2.imread(pred_path), cv2.COLOR_BGR2RGB))
+        else:
+            preds.append(np.zeros((640,640,3), dtype=np.uint8))
+
+    titles = list(models.keys())
+    fig, axes = plt.subplots(2, 2, figsize=(12,12))
+
+    idx = 0
+    for r in range(2):
+        for c in range(2):
+            axes[r,c].imshow(preds[idx])
+            axes[r,c].set_title(titles[idx])
+            axes[r,c].axis("off")
+            idx += 1
+
+    plt.tight_layout()
+
+    # Save mosaic to Drive
+    if save_dir:
+        os.makedirs(save_dir, exist_ok=True)
+        save_path = os.path.join(save_dir, f"mosaic_{os.path.basename(image_path)}")
+        plt.savefig(save_path, bbox_inches="tight")
+        print("Saved mosaic to:", save_path)
+
+    plt.show()
+
+
+# =========================================================
+# Generate mosaics for multiple images automatically
+# =========================================================
+
+mosaic_output_dir = "/content/drive/My Drive/YOLO_Models/realV2_mosaics"
+os.makedirs(mosaic_output_dir, exist_ok=True)
+
+num_images = 20   # Change this number for more or fewer mosaics
+
+print(f"Generating {num_images} mosaics...")
+
+for i, img_path in enumerate(test_images[:num_images]):
+    print(f"[{i+1}/{num_images}] {img_path}")
+    show_mosaic(img_path, save_dir=mosaic_output_dir)
+
+print("\nAll mosaics saved!")
+
+print("\n=== COMPLETE ===")
+
+
+
