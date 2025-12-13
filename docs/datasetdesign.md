@@ -29,6 +29,8 @@ All datasets use the same base tank prefab, Perception Camera, and bounding box 
 ---
 
 ## Synthetic Dataset 1 — Baseline
+<img width="733" height="314" alt="image" src="https://github.com/user-attachments/assets/7001113e-f032-461f-a63f-9566c401871e" />
+
 
 ### Purpose
 Establish a clean baseline for tank detection with minimal visual complexity.
@@ -55,6 +57,7 @@ Establish a clean baseline for tank detection with minimal visual complexity.
 ---
 
 ## Synthetic Dataset 2 — Outdoor / Desert Generalization
+<img width="733" height="314" alt="image" src="https://github.com/user-attachments/assets/9800ef5c-a216-4a27-8142-3514d4abd677" />
 
 ### Purpose
 Improve generalization to outdoor daylight environments.
@@ -77,6 +80,7 @@ Improve generalization to outdoor daylight environments.
 ---
 
 ## Synthetic Dataset 3 — Low-Light / Night
+<img width="733" height="314" alt="image" src="https://github.com/user-attachments/assets/09afd681-94f0-4af4-a7f0-d8a0a66fa507" />
 
 ### Purpose
 Improve robustness under poor visibility and motion.
@@ -100,6 +104,7 @@ Improve robustness under poor visibility and motion.
 ---
 
 ## Synthetic Dataset 4 — Extreme Robustness (Multi-Sequence)
+<img width="732" height="314" alt="image" src="https://github.com/user-attachments/assets/1b60a976-94ba-4c37-89cb-239e3a5fd5b1" />
 
 ### Purpose
 Stress-test object detection under compounded visual degradation.
