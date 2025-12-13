@@ -1,0 +1,149 @@
+# ================================================================
+# 1. Install and import Ultralytics
+# ================================================================
+!pip install ultralytics --quiet
+
+from ultralytics import YOLO
+import os
+import pandas as pd
+
+print("Ultralytics version loaded.")
+
+# ================================================================
+# 2. Mount Google Drive
+# ================================================================
+from google.colab import drive
+drive.mount('/content/drive')
+
+# ================================================================
+# 3. Define dataset path and create dataset YAML automatically
+# ================================================================
+dataset_dir = "/content/drive/My Drive/Colab Notebooks/MA489SyntheticDataPipeline/realTimeDatasets/realTanksdatasetV2"
+yaml_path = f"{dataset_dir}/realV2.yaml"
+
+yaml_text = f"""
+path: {dataset_dir}
+
+train: null
+val: valid/images
+test: test/images
+
+names:
+  0: tank
+"""
+
+with open(yaml_path, "w") as f:
+    f.write(yaml_text)
+
+print("Created YAML at:", yaml_path)
+
+# ================================================================
+# 4. Verify dataset structure
+# ================================================================
+print("\n=== Dataset Structure Check ===")
+assert os.path.exists(f"{dataset_dir}/valid/images")
+assert os.path.exists(f"{dataset_dir}/valid/labels")
+assert os.path.exists(f"{dataset_dir}/test/images")
+assert os.path.exists(f"{dataset_dir}/test/labels")
+print("Dataset structure verified.\n")
+
+# ================================================================
+# 5. Load BASE YOLO model (NOT trained by you)
+# ================================================================
+BASE_MODEL_NAME = "yolov8s.pt"  # change to yolov8n.pt if desired
+model = YOLO(BASE_MODEL_NAME)
+
+print(f"Loaded base model: {BASE_MODEL_NAME}")
+
+# ================================================================
+# 6. Evaluate base model on real dataset
+# ================================================================
+print("\n=== Evaluating Base YOLO Model ===")
+
+results = model.val(
+    data=yaml_path,
+    imgsz=640,
+    device="cpu"
+)
+
+metrics = results.results_dict
+
+results_list = [{
+    "Model": BASE_MODEL_NAME,
+    "mAP50": metrics["metrics/mAP50(B)"],
+    "mAP50-95": metrics["metrics/mAP50-95(B)"],
+    "Precision": metrics["metrics/precision(B)"],
+    "Recall": metrics["metrics/recall(B)"]
+}]
+
+# ================================================================
+# 7. Output summary table + save CSV
+# ================================================================
+df = pd.DataFrame(results_list)
+
+print("\n=== BASE MODEL RESULTS ===\n")
+print(df)
+
+csv_path = "/content/drive/My Drive/YOLO_Models/base_yolo_realV2_results.csv"
+df.to_csv(csv_path, index=False)
+
+print("\nSaved CSV to:", csv_path)
+
+# ================================================================
+# 8. Save prediction images
+# ================================================================
+print("\n=== Running Predictions ===")
+
+model.predict(
+    source=f"{dataset_dir}/test/images",
+    save=True,
+    imgsz=640,
+    device="cpu",
+    name="realV2_baseYOLO"
+)
+
+print("\nPredictions saved to /content/runs/detect/realV2_baseYOLO")
+print("\n=== COMPLETE ===")
+------------------------------------------------------------------------------------------------------------
+import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+from glob import glob
+
+def show_mosaic(image_path, save_dir=None):
+    out_dir = "/content/runs/detect/realV2_baseYOLO"
+    pred_path = f"{out_dir}/{os.path.basename(image_path)}"
+
+    if os.path.exists(pred_path):
+        img = cv2.cvtColor(cv2.imread(pred_path), cv2.COLOR_BGR2RGB)
+    else:
+        img = np.zeros((640,640,3), dtype=np.uint8)
+
+    plt.figure(figsize=(6,6))
+    plt.imshow(img)
+    plt.title("Base YOLO (COCO pretrained)")
+    plt.axis("off")
+
+    if save_dir:
+        os.makedirs(save_dir, exist_ok=True)
+        save_path = os.path.join(save_dir, f"mosaic_{os.path.basename(image_path)}")
+        plt.savefig(save_path, bbox_inches="tight")
+        print("Saved mosaic to:", save_path)
+
+    plt.show()
+
+# =========================================================
+# Generate mosaics
+# =========================================================
+test_images = sorted(glob(f"{dataset_dir}/test/images/*"))
+mosaic_output_dir = "/content/drive/My Drive/YOLO_Models/realV2_baseYOLO_mosaics"
+
+num_images = 100
+print(f"Generating {num_images} mosaics...")
+
+for i, img_path in enumerate(test_images[:num_images]):
+    print(f"[{i+1}/{num_images}] {img_path}")
+    show_mosaic(img_path, save_dir=mosaic_output_dir)
+
+print("\nAll base YOLO mosaics saved.")
