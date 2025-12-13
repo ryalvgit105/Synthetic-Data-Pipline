@@ -1,0 +1,224 @@
+# =====================================================================
+# SYNTHETIC DATA PIPELINE 1 (FINAL, GPU READY, 70 IMAGES, 40 EPOCHS)
+# =====================================================================
+
+from google.colab import drive
+drive.mount('/content/drive')
+
+# =====================================================================
+# 1. INSTALL YOLO
+# =====================================================================
+!pip install ultralytics -q
+
+# =====================================================================
+# 2. IMPORTS
+# =====================================================================
+from ultralytics import YOLO
+import os, glob, random, shutil, json, torch
+from PIL import Image
+from IPython.display import Image as IPImage, display
+
+# =====================================================================
+# 3. GPU CHECK
+# =====================================================================
+device_choice = "cuda" if torch.cuda.is_available() else "cpu"
+print("Using device:", device_choice)
+
+# =====================================================================
+# 4. SET DATASET PATH
+# =====================================================================
+dataset_path = "/content/drive/My Drive/Colab Notebooks/MA489SyntheticDataPipeline/syntheticDatasets/baseSyntheticDataset/syntheticDataset1/sequence.1"
+print("Dataset folder:", dataset_path)
+
+image_pattern = "*.camera.png"
+json_pattern  = "*.frame_data.json"
+
+# =====================================================================
+# 5. COLLECT IMAGES & JSON
+# =====================================================================
+images_all = sorted(glob.glob(os.path.join(dataset_path, image_pattern)))
+json_files = sorted(glob.glob(os.path.join(dataset_path, json_pattern)))
+
+print("Total images found:", len(images_all))
+print("Total JSON files found:", len(json_files))
+
+if len(images_all) == 0:
+    raise RuntimeError("ERROR: No images found. Check folder path (*.camera.png).")
+
+if len(json_files) == 0:
+    raise RuntimeError("ERROR: No JSON files found (*.frame_data.json).")
+
+# =====================================================================
+# 6. LIMIT TO FIRST 70 IMAGES
+# =====================================================================
+images = images_all[:70]
+print("USING ONLY THESE MANY IMAGES:", len(images))
+
+# Map base → image
+image_map = {}
+for img in images_all:
+    base = os.path.basename(img).replace(".camera.png", "")
+    image_map[base] = img
+
+# =====================================================================
+# 7. CREATE YOLO FOLDERS
+# =====================================================================
+yolo_base = "/content/yolo_dataset"
+temp_labels = f"{yolo_base}/temp_labels"
+train_img_dest = f"{yolo_base}/images/train"
+val_img_dest   = f"{yolo_base}/images/val"
+train_lbl_dest = f"{yolo_base}/labels/train"
+val_lbl_dest   = f"{yolo_base}/labels/val"
+
+!rm -rf /content/yolo_dataset
+!mkdir -p $temp_labels $train_img_dest $val_img_dest $train_lbl_dest $val_lbl_dest
+
+# =====================================================================
+# 8. JSON → YOLO LABEL CONVERSION
+# =====================================================================
+def convert_json(json_file):
+    base = os.path.basename(json_file).replace(".frame_data.json", "")
+    if base not in image_map:
+        return False
+
+    img_file = image_map[base]
+    out_file = os.path.join(temp_labels, os.path.basename(img_file).replace(".png", ".txt"))
+
+    with open(json_file, "r") as f:
+        data = json.load(f)
+
+    captures = data.get("captures", [])
+    if not captures:
+        return False
+
+    annotations = captures[0].get("annotations", [])
+    if not annotations:
+        return False
+
+    values = annotations[0].get("values", [])
+    if not values:
+        return False
+
+    img = Image.open(img_file)
+    W, H = img.size
+
+    written = False
+    with open(out_file, "w") as f:
+        for v in values:
+            if v["labelName"] != "Tank":
+                continue
+
+            x_min, y_min = v["origin"]
+            w, h = v["dimension"]
+
+            xc = (x_min + w/2) / W
+            yc = (y_min + h/2) / H
+            wn = w / W
+            hn = h / H
+
+            f.write(f"0 {xc} {yc} {wn} {hn}\n")
+            written = True
+
+    return written
+
+labels_written = sum(convert_json(j) for j in json_files)
+print("Labels generated:", labels_written)
+
+# =====================================================================
+# 9. TRAIN/VAL SPLIT
+# =====================================================================
+random.shuffle(images)
+split = int(len(images) * 0.9)
+train_images = images[:split]
+val_images   = images[split:]
+
+print("TRAIN:", len(train_images))
+print("VAL:", len(val_images))
+
+# =====================================================================
+# 10. COPY IMAGES + LABELS
+# =====================================================================
+def lbl(img):
+    return os.path.join(temp_labels, os.path.basename(img).replace(".png", ".txt"))
+
+for img in train_images:
+    shutil.copy(img, train_img_dest)
+    if os.path.exists(lbl(img)):
+        shutil.copy(lbl(img), train_lbl_dest)
+
+for img in val_images:
+    shutil.copy(img, val_img_dest)
+    if os.path.exists(lbl(img)):
+        shutil.copy(lbl(img), val_lbl_dest)
+
+print("Copied training + validation data.")
+
+# =====================================================================
+# 11. WRITE YAML
+# =====================================================================
+yaml_text = """
+train: /content/yolo_dataset/images/train
+val: /content/yolo_dataset/images/val
+
+names:
+  0: Tank
+"""
+
+with open("synthetic.yaml", "w") as f:
+    f.write(yaml_text)
+
+# =====================================================================
+# 12. TRAIN YOLO
+# =====================================================================
+model = YOLO("yolov8s.pt")
+
+results = model.train(
+    data="synthetic.yaml",
+    epochs=40,
+    imgsz=640,
+    batch=8,
+    lr0=0.001,
+    weight_decay=0.0005,
+    optimizer="SGD",
+    patience=10,
+    cos_lr=True,
+    fliplr=0.5,
+    mosaic=0.0,
+    hsv_h=0.015,
+    hsv_s=0.7,
+    hsv_v=0.4,
+    device=device_choice,
+    project="/content/drive/My Drive/YOLO_Models",
+    name="synthetic_v1"
+)
+
+print("Training completed:", results.save_dir)
+
+# =====================================================================
+# 13. DISPLAY TRAINING CURVES
+# =====================================================================
+latest = str(results.save_dir)
+
+display(IPImage(filename=os.path.join(latest, "results.png")))
+display(IPImage(filename=os.path.join(latest, "confusion_matrix.png")))
+display(IPImage(filename=os.path.join(latest, "confusion_matrix_normalized.png")))
+
+# =====================================================================
+# 14. SAMPLE TRAINING PREDICTIONS
+# =====================================================================
+best = YOLO(os.path.join(latest, "weights", "best.pt"))
+samples = train_images[:5]
+
+preds = best.predict(source=samples, save=True, device=device_choice)
+print("Prediction images saved to:", preds[0].save_dir)
+
+# =====================================================================
+# 15. SAVE FINAL MODEL (UPDATED SAVE LOCATION)
+# =====================================================================
+final_dst = "/content/drive/My Drive/YOLO_Models/pipeline1_v2/best.pt"
+os.makedirs(os.path.dirname(final_dst), exist_ok=True)
+
+shutil.copy(os.path.join(latest, "weights", "best.pt"), final_dst)
+
+print("Pipeline 1 FINAL model saved to:", final_dst)
+
