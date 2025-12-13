@@ -1,23 +1,92 @@
 # Unity Synthetic Data Pipeline for Object Detection
 
 ## Overview
-1–2 paragraphs explaining:
-- What you built
-- Why synthetic data matters
-- What problem this pipeline solves
+
+This repository documents a complete synthetic data pipeline for training and evaluating an object detection model using **Unity Perception** and **YOLOv8**. The pipeline generates labeled synthetic images of military tanks under progressively more complex visual conditions, trains independent YOLO models on each dataset, and evaluates those models on real-world tank imagery.
+
+Synthetic data enables controlled experimentation that would be difficult, expensive, or unsafe to replicate in the real world. By systematically introducing lighting variation, camera motion, low-visibility conditions, and occlusion, this pipeline isolates how specific environmental factors impact object detection performance and generalization to real images.
+
+The primary problem this pipeline addresses is **data scarcity and controllability** in military vehicle detection. Real labeled datasets are limited and biased; this workflow provides a repeatable, scalable method for generating labeled data and measuring robustness across conditions.
+
+---
 
 ## Pipeline Summary
-High-level bullet list:
-1. Synthetic data generation in Unity
-2. Creation of four tank datasets
-3. YOLO training in Google Colab
-4. Evaluation on real-world tank images
+
+High-level workflow:
+
+- Synthetic data generation in **Unity HDRP** using the **Unity Perception Package**
+- Creation of **four synthetic tank datasets**, each introducing additional visual complexity
+- Automated bounding box labeling using Perception labelers
+- YOLOv8 object detection training in **Google Colab**
+- Evaluation of trained models on **real-world tank images** (Roboflow dataset)
+- Comparison using bounding boxes, confidence scores, precision, and recall
+
+---
+
+## Synthetic Dataset Design (Datasets 1–4)
+
+Each dataset was generated independently in Unity and trained as a **separate YOLOv8 model**.
+
+### Synthetic Dataset 1 — Baseline
+
+- Static tank and camera  
+- Bright daylight lighting  
+- No motion blur  
+- No occlusion  
+
+**Purpose:** Establish a clean baseline for detection performance.
+
+---
+
+### Synthetic Dataset 2 — Outdoor / Desert Generalization
+
+- Camera pose randomization (angle, height, distance)  
+- Directional light randomization (rotation, intensity, color)  
+- Desert-style terrain  
+
+**Purpose:** Improve generalization to outdoor daylight scenes.
+
+---
+
+### Synthetic Dataset 3 — Low-Light / Night
+
+- Expanded lighting randomization with low-intensity ranges  
+- Reduced ambient lighting  
+- HDRP motion blur enabled  
+
+**Purpose:** Improve robustness under poor visibility and motion.
+
+---
+
+### Synthetic Dataset 4 — Extreme Robustness (Multi-Sequence)
+
+- Multiple Perception sequences (separate image/label folders)  
+- Aggressive camera motion  
+- Heavy motion blur  
+- Random foreground occluders  
+- Mixed medium-to-dark lighting  
+
+**Purpose:** Stress-test detection under compounded visual degradation.
+
+---
 
 ## Repository Structure
-Explain what each folder is for.
 
-## Documentation
-Links to the files in /docs.
-
-## Status
-Course / research context (MA489).
+```text
+.
+├── unity/
+│   ├── scenes/            # Unity Perception scenes for datasets 1–4
+│   ├── scripts/           # Camera, lighting, occluder randomizers
+│   └── prefabs/           # Tank prefab with labeling component
+│
+├── colab/
+│   ├── dataset_prep/      # JSON → YOLO label conversion scripts
+│   ├── training/          # YOLOv8 training notebooks
+│   └── evaluation/        # Real-image testing and visualization
+│
+├── docs/
+│   ├── dataset_design.md  # Detailed dataset breakdown
+│   ├── pipeline_steps.md  # End-to-end workflow explanation
+│   └── results.md         # Performance comparison and observations
+│
+└── README.md
