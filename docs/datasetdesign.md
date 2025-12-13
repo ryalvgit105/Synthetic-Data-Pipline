@@ -121,7 +121,7 @@ Stress-test object detection under compounded visual degradation.
 - High clutter and partial occlusion
 
 ### Scripts Used
-- Occluder randomizer
+- Object randomizer
 - Camera randomizer (aggressive)
 - Light randomizer (wide range)
 - HDRP Motion Blur (high intensity)
