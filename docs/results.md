@@ -21,7 +21,8 @@ Evaluation focuses on **precision** and **recall**, measured consistently across
 
 ## Precision Comparison
 
-![Precision Comparison Across Pipelines](images/precision_comparison.png)
+<img width="745" height="648" alt="image" src="https://github.com/user-attachments/assets/5e13b638-448d-4127-b9aa-45cc6e99cdc4" />
+
 
 ### Observations
 
@@ -41,7 +42,8 @@ Evaluation focuses on **precision** and **recall**, measured consistently across
 
 ## Recall Comparison
 
-![Recall Comparison Across Pipelines](images/recall_comparison.png)
+<img width="751" height="653" alt="image" src="https://github.com/user-attachments/assets/6f0dc6f2-b7f2-4a59-922a-952c548f1f13" />
+
 
 ### Observations
 
