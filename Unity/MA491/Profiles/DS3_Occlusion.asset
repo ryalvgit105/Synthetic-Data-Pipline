@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 164a585da758f154d9f819b14f787174, type: 3}
+  m_Name: DS3_Occlusion
+  m_EditorClassIdentifier: 
+  datasetName: ds3_occlusion_v1_run0001
+  seed: 539662033
+  framesPerIteration: 1
+  totalIterations: 1000
+  autoStopInEditor: 0
+  maxRuntimeFrames: 200
+  randomizeCamera: 0
+  yawSteps: 36
+  elevationSteps: 3
+  distanceSteps: 9
+  randomCameraHoldFrames: 6
+  randomCameraMoveLerp: 0.2
+  minPitchDeg: 5
+  maxPitchDeg: 25
+  minDistance: 4
+  maxDistance: 300
+  minTargetScreenFraction: 0.03
+  randomizeDirectionalLight: 0
+  randomizeLightDirection: 0
+  lightIntensityRange: {x: 1, y: 1}
+  lightColorTempRange: {x: 6500, y: 6500}
+  enableFillLight: 0
+  fillLightIntensity: 1.2
+  enableOcclusion: 1
+  occlusionFrameProbability: 0.35
+  occluderCount: 4
+  occluderHoldFrames: 8
+  occluderDistanceMin01: 0.25
+  occluderDistanceMax01: 0.62
+  occluderScaleMin: 0.5
+  occluderScaleMax: 1.2
+  occluderLateralSpread: 1.2
+  useVariedOccluderShapes: 1
+  useProjectOccluderPrefabs: 0
+  projectOccluderPrefabPaths: []
+
+
+
