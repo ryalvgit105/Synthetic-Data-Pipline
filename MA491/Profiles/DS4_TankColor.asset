@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 164a585da758f154d9f819b14f787174, type: 3}
+  m_Name: DS4_TankColor
+  m_EditorClassIdentifier: 
+  datasetName: ds4_tankcolor_v1_run0001
+  seed: 539662034
+  framesPerIteration: 1
+  totalIterations: 1000
+  autoStopInEditor: 0
+  maxRuntimeFrames: 200
+  randomizeCamera: 0
+  yawSteps: 36
+  elevationSteps: 3
+  distanceSteps: 9
+  randomCameraHoldFrames: 6
+  randomCameraMoveLerp: 0.2
+  minPitchDeg: 5
+  maxPitchDeg: 25
+  minDistance: 4
+  maxDistance: 300
+  minTargetScreenFraction: 0.03
+  randomizeDirectionalLight: 0
+  randomizeLightDirection: 0
+  lightIntensityRange: {x: 1, y: 1}
+  lightColorTempRange: {x: 6500, y: 6500}
+  enableFillLight: 0
+  fillLightIntensity: 1.2
+  enableOcclusion: 0
+  occlusionFrameProbability: 0.4
+  occluderCount: 2
+  occluderHoldFrames: 8
+  occluderDistanceMin01: 0.25
+  occluderDistanceMax01: 0.65
+  occluderScaleMin: 0.8
+  occluderScaleMax: 1.8
+  occluderLateralSpread: 1.2
+  overrideTankColor: 1
+  tankColor: {r: 0.74, g: 0.7, b: 0.54, a: 1}
+  randomizeTankColor: 1
+  tankColorHoldFrames: 5
+  tankColorPalette:
+  - {r: 0.74, g: 0.70, b: 0.54, a: 1}
+  - {r: 0.67, g: 0.62, b: 0.46, a: 1}
+  - {r: 0.60, g: 0.55, b: 0.40, a: 1}
+  - {r: 0.50, g: 0.45, b: 0.33, a: 1}
+  - {r: 0.40, g: 0.45, b: 0.30, a: 1}
+  - {r: 0.33, g: 0.38, b: 0.24, a: 1}
+  - {r: 0.27, g: 0.32, b: 0.20, a: 1}
+  - {r: 0.22, g: 0.27, b: 0.17, a: 1}
+  - {r: 0.36, g: 0.36, b: 0.36, a: 1}
+  - {r: 0.28, g: 0.28, b: 0.28, a: 1}
+  - {r: 0.22, g: 0.22, b: 0.22, a: 1}
+  - {r: 0.16, g: 0.16, b: 0.16, a: 1}
+
+
+

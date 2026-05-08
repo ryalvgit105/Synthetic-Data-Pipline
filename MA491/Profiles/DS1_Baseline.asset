@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 164a585da758f154d9f819b14f787174, type: 3}
+  m_Name: DS1_Baseline
+  m_EditorClassIdentifier: 
+  datasetName: ds1_baseline_v1_run0001
+  seed: 539662031
+  framesPerIteration: 1
+  totalIterations: 1000
+  autoStopInEditor: 0
+  maxRuntimeFrames: 200
+  randomizeCamera: 0
+  yawSteps: 36
+  elevationSteps: 3
+  distanceSteps: 9
+  randomCameraHoldFrames: 6
+  randomCameraMoveLerp: 0.2
+  minPitchDeg: 5
+  maxPitchDeg: 25
+  minDistance: 4
+  maxDistance: 300
+  minTargetScreenFraction: 0.03
+  randomizeDirectionalLight: 0
+  lightIntensityRange: {x: 1, y: 1}
+  lightColorTempRange: {x: 6500, y: 6500}
+
+
+
